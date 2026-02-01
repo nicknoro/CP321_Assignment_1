@@ -131,7 +131,7 @@ public class ClientHandler implements Runnable {
         out.println("ERROR OUT_OF_BOUNDS Note exceeds board boundaries");
       }
       else if (res==2){
-        out.println("ERROR COLOR_NOT_SUPPORTED blue is not a valid color");
+        out.println("ERROR COLOR_NOT_SUPPORTED not a valid color");
       }
       else {
         out.println("ERROR COMPLETE_OVERLAP Note overlaps an existing note entirely");
@@ -153,41 +153,39 @@ public class ClientHandler implements Runnable {
   • Server returns all notes satisfying all provided criteria
   */
   private void getHandle(String[] tokens){
-    if (tokens.length < 5) {
-      out.println("ERROR INVALID_ARGUMENTS");
-      return;
-    }
-    //Exception handling for achieving Get request arguments
-    try{
-      String[] col=tokens[1].split("=");
-      String color=col[1];
+  try{
+        String color = null;
+        int x = -1, y = -1;
+        String referWord = null;
 
-      String[] c1=tokens[2].split("=");
-      int x=Integer.parseInt(c1[1]);
-      int y=Integer.parseInt(tokens[3]);
+        for(int i = 1; i < tokens.length; i++){
+            String[] pair = tokens[i].split("=",2); // split into 2 parts only
+            if(pair.length < 2) continue;
 
-      String[] refersto=tokens[4].split("=");
-      String referWord=refersto[1];
+            switch(pair[0].toLowerCase()){
+                case "color": color = pair[1]; break;
+                case "contains":
+                    if(pair[1].contains(" ")) {
+                        String[] coords = pair[1].split(" ");
+                        x = Integer.parseInt(coords[0]);
+                        y = Integer.parseInt(coords[1]);
+                    }
+                    break;
+                case "refersto": referWord = pair[1]; break;
+            }
+        }
 
-      Note n=board.getNote(color,x,y,referWord);//Board method for 'getting' note
+        Note n = board.getNote(color, x, y, referWord);
 
-      if (n == null) {
-        out.println("ERROR NOTE_NOT_FOUND");
-      } 
-      else {
-        out.println(
-            "NOTE " +
-            n.getX() + " " +
-            n.getY() + " " +
-            n.getColor() + " " +
-            n.getMessage() +
-            " PINNED=" + n.isPinned()
+        if(n == null) out.println("ERROR NOTE_NOT_FOUND");
+        else out.println(
+            "NOTE " + n.getX() + " " + n.getY() + " " + n.getColor() + " " +
+            n.getMessage() + " PINNED=" + n.isPinned()
         );
-      }
-          
-    }
-    catch(NumberFormatException e){
-      out.println("ERROR INVALID_REQUEST");
+
+    } catch(Exception e){
+        out.println("ERROR INVALID_REQUEST");
+        System.out.println("DEBUG: getHandle error: " + e.getMessage());
     }
 }
 
@@ -230,9 +228,9 @@ public class ClientHandler implements Runnable {
       int x=Integer.parseInt(tokens[1]);
       int y=Integer.parseInt(tokens[2]);
 
-      boolean success=board.pin(x,y); //Board method for pinnning
+      int success=board.pin(x,y); //Board method for pinnning
 
-      if (!success){
+      if (success==0){
         out.println("ERROR NO_NOTE_AT_COORDINATE No note contains the given poin");
       }
       else{

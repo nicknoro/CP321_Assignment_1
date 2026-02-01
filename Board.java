@@ -41,7 +41,7 @@ public class Board {
 
   // Adding/Posting Note: Answering postHandle()
   public synchronized int addNote(int x,int y, String color, String message){
-    if (x>this.boardWidth && y>this.boardHeight){
+    if (x>this.boardWidth || y>this.boardHeight){
       return 1;
     }
     if (!this.getColors().contains(color.toLowerCase())) {
@@ -64,10 +64,10 @@ public class Board {
       if (color != null && !note.getColor().equalsIgnoreCase(color))
           continue;
 
-      if (note.getX() != x)
+      if (x != -1 && note.getX() != x)
           continue;
 
-      if (note.getY() != y)
+      if (y != -1 && note.getY() != y)
           continue;
 
       if (referWord != null && !note.getMessage().contains(referWord))
@@ -97,14 +97,15 @@ public class Board {
   }
 
   //Pin: Answering pinHandle()
-  public synchronized boolean pin(int x,int y){
+  public synchronized int pin(int x,int y){
+    int result=0;
     for (Note note:notes){
       if(note.contains(x, y, getNoteWidth(), getNoteHeight())){
         note.addPin(x, y);
-        return true;
+        result=1;
       }
     }
-    return false;
+    return result;
   }
 
   //Clear notes and pins: Answering clearHandle()
@@ -115,6 +116,7 @@ public class Board {
       this.notes.clear();
   }
 
+  //Answers shakeHandle()
   public synchronized void shake(){
     notes.removeIf(note -> !note.isPinned());
   }

@@ -5,7 +5,6 @@ public class Note {
   private int noteY;
   private String color;
   private String message;
-  private boolean isPinned=false;
   private Set<String> pins=new HashSet<>();
 
   public Note(int x, int y,String color,String message){
